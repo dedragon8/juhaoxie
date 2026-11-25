@@ -2,7 +2,7 @@
 
 用直觉写作。一款为中文剧本写作和 AI 视频创作做的 Mac 应用。
 
-[免费下载 Mac 版](https://github.com/dedragon8/juhaoxie/releases/latest) · [观看中文实机演示](media/juhaoxie-demo-zh.mp4)
+[免费下载 Mac 版](https://github.com/dedragon8/juhaoxie/releases/latest) · [观看中文实机演示](juhaoxie-demo-zh.mp4)
 
 ## 视频简介
 
@@ -19,3 +19,4 @@
 此版本采用本地签名，未经 Apple 公证。下载页附有 SHA-256 校验文件。
 
 © 2026 Fu Junhao
+
