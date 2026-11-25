@@ -1,0 +1,17 @@
+node_modules/
+dist/
+release/
+data/
+.local/
+artifacts/
+test-results/
+playwright-report/
+.env
+.DS_Store
+native/build/
+*.provisionprofile
+.pnpm-store/
+tmp/
+.env.*
+*.p12
+*.mobileprovision

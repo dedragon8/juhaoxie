@@ -1,0 +1,8 @@
+剧好写
+© 2026 Fu Junhao
+
+剧好写原创程序按 GNU General Public License version 3 only（GPL-3.0-only）发布，许可全文见 LICENSE。
+本程序按 GPL 第 3 版提供，无任何担保。对应源码与构建说明见 https://github.com/dedragon8/juhaoxie 。
+
+第三方依赖和引用作品保留原许可与署名。组件及技能的许可全文见“第三方组件许可.txt”，来源索引见 THIRD_PARTY.md。Electron 与 Chromium 许可随应用保存在 Contents/Resources/licenses/。
+用户的剧本、人物设定和 Prompt 等创作内容的权利归各自权利人所有。

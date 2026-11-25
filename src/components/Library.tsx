@@ -1,0 +1,27 @@
+import {useSecurity,protectedProject} from '../core/security';
+import {useState} from 'react';
+import {Plus,Search,FolderOpen,Settings2,FileText,ArrowUpRight,Trash2,RotateCcw} from 'lucide-react';
+import type {ProjectEntry} from '../core/model';
+import {Modal} from './Modal';
+import {LibraryMenu} from './LibraryMenu';
+export function Library({projects,onOpen,onNew,onImport,onDemo,onSettings,onDelete,onRestore,onReveal}:{projects:ProjectEntry[];onOpen:(project:ProjectEntry)=>void;onNew:()=>void;onImport:()=>void;onDemo:()=>Promise<void>;onSettings:()=>void;onDelete:(project:ProjectEntry)=>Promise<void>;onRestore:(project:ProjectEntry)=>void;onReveal:(project:ProjectEntry)=>Promise<void>}){
+ useSecurity();
+ const [query,setQuery]=useState(''),[sort,setSort]=useState('recent'),[selected,setSelected]=useState(''),[managing,setManaging]=useState<ProjectEntry|null>(null),[menu,setMenu]=useState<{project:ProjectEntry;left:number;top:number}|null>(null),[trash,setTrash]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const active=projects.filter(p=>!p.deletedAt),deleted=projects.filter(p=>p.deletedAt);
+ const visible=active.filter(p=>p.title.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>sort==='recent'?b.updatedAt-a.updatedAt:a.title.localeCompare(b.title,'zh-CN'));
+ const openMenu=(project:ProjectEntry,left:number,top:number)=>{setSelected(project.id);setMenu({project,left,top});setError('')};
+ const run=async(action:()=>Promise<void>,close=false)=>{setBusy(true);setError('');try{await action();if(close)setManaging(null)}catch(e){setError(String(e))}finally{setBusy(false)}};
+ return <main className="library"><header className="library-heading"><div><h1>剧本库</h1><p>{active.length} 部剧本 · 保存在本机</p></div><div className="library-actions"><button className="secondary" onClick={onImport}><FolderOpen size={16}/>打开剧本</button><button className="primary" onClick={onNew}><Plus size={16}/>新建剧本</button><button className="icon-btn" aria-label="打开设置" onClick={onSettings}><Settings2 size={18}/></button></div></header>
+ <div className="library-tools"><label className="search-box"><Search size={16}/><input aria-label="搜索剧本库" placeholder="搜索剧本名称" value={query} onChange={e=>setQuery(e.target.value)}/></label><select aria-label="剧本排序" value={sort} onChange={e=>setSort(e.target.value)}><option value="recent">最近修改</option><option value="title">名称</option></select><button className="text-btn" disabled={busy} onClick={()=>void run(async()=>{await onDemo();setQuery('')})}>添加演示剧本</button><button className="text-btn" onClick={()=>setTrash(true)}><Trash2 size={15}/>最近删除{deleted.length?` · ${deleted.length}`:''}</button></div>
+ {active.length===0?<div className="library-empty"><FileText size={44} strokeWidth={1}/><h2>创建第一部剧本</h2><p>可以打开 .jhwrite 剧本，也兼容旧版 .drg 和 .changjing 文件。</p><button className="primary" onClick={onNew}><Plus size={16}/>新建剧本</button></div>:<div className="library-grid">{visible.map(project=><article className={`library-card ${selected===project.id?'is-selected':''}`} key={project.id} onDoubleClick={()=>onOpen(project)} onContextMenu={e=>{e.preventDefault();openMenu(project,e.clientX,e.clientY)}} onKeyDown={e=>{if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10')){e.preventDefault();const r=e.currentTarget.getBoundingClientRect();openMenu(project,r.left+20,r.top+20)}}}>
+ <button className="book-cover" aria-label={`选择剧本：${project.title}`} aria-pressed={selected===project.id} onClick={()=>setSelected(project.id)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();onOpen(project)}}}><span className="book-title">{project.title}</span><div className="book-lines"><i/><i/><i/><i/><i/></div>{(protectedProject(project.id,project.cloud)||project.cloud)&&<span className="book-caption">{protectedProject(project.id,project.cloud)?'安全区 · 仅本机':'本地副本 · 同步已关闭'}</span>}</button>
+ <div className="book-info"><button aria-label={`打开剧本：${project.title}`} onClick={()=>setSelected(project.id)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();onOpen(project)}}}><strong>{project.title}</strong><ArrowUpRight size={16}/></button><span>{new Date(project.updatedAt).toLocaleString('zh-CN',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})} 修改</span></div></article>)}</div>}
+ {active.length>0&&visible.length===0&&<p className="empty-state">没有找到匹配的剧本</p>}
+ <footer className="library-copyright">© 2026 Fu Junhao</footer>
+ {menu&&<LibraryMenu left={menu.left} top={menu.top} canReveal={!!window.desktop&&!busy} onClose={()=>setMenu(null)} onReveal={()=>{const project=menu.project;setMenu(null);void run(()=>onReveal(project))}} onDelete={()=>{setManaging(menu.project);setMenu(null);setError('')}}/>}
+ {error&&!managing&&<p role="alert">{error}</p>}
+ {managing&&<Modal title="删除剧本" onClose={()=>{if(!busy)setManaging(null)}}><p className="modal-intro">将“{managing.title}”移到最近删除？你可以随时恢复。外部 .jhwrite 文件和 iCloud 中的共享剧本不会被删除。</p><div className="modal-actions"><button className="secondary" disabled={busy} onClick={()=>setManaging(null)}>取消</button><button className="primary" disabled={busy} onClick={()=>void run(()=>onDelete(managing),true)}>确认删除</button></div>{error&&<p role="alert">{error}</p>}</Modal>}
+
+ {trash&&<Modal title="最近删除" onClose={()=>setTrash(false)}>{deleted.length?deleted.map(p=><div className="library-trash-row" key={p.id}><span>{p.title}</span><button className="secondary" onClick={()=>onRestore(p)}><RotateCcw size={15}/>恢复剧本</button></div>):<p className="empty-state">没有已删除的剧本</p>}</Modal>}
+ </main>;
+}

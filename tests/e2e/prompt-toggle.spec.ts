@@ -1,0 +1,9 @@
+import {test,expect} from '@playwright/test';import {newScript} from './helpers';
+test('Prompt can be hidden and reopened without losing saved shots or the current draft',async({page})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await newScript(page,'Prompt 开关');await page.locator('.tiptap').first().fill('她走到窗前。');await page.getByRole('button',{name:'Prompt',exact:true}).click();
+ await page.locator('.prompt-source-scroll').evaluate(el=>{const p=el.querySelector('[data-prompt-paragraph]')!,r=document.createRange();r.selectNodeContents(p);const selection=window.getSelection()!;selection.removeAllRanges();selection.addRange(r);el.dispatchEvent(new MouseEvent('mouseup',{bubbles:true}))});
+ await page.getByLabel('Prompt 画面',{exact:true}).fill('她缓缓走向窗边。');await page.getByRole('button',{name:'保存镜头',exact:true}).click();await expect(page.locator('.prompt-library-item')).toHaveCount(1);await page.getByLabel('Prompt 画面',{exact:true}).fill('这段草稿需要保留。');
+ const toggle=async(enabled:boolean)=>{await page.getByLabel('打开设置',{exact:true}).click();await page.getByRole('button',{name:'外观',exact:true}).click();await page.getByLabel('Prompt 工作区',{exact:true}).setChecked(enabled);await page.getByRole('button',{name:'关闭',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0)};
+ await toggle(false);await expect(page.getByRole('button',{name:'Prompt',exact:true})).toHaveCount(0);await expect(page.locator('.tiptap').first()).toHaveText('她走到窗前。');
+ await page.reload();await expect(page.getByRole('button',{name:'Prompt',exact:true})).toHaveCount(0);await page.getByRole('button',{name:'选择剧本：Prompt 开关',exact:true}).dblclick();await toggle(true);await page.getByRole('button',{name:'Prompt',exact:true}).click();await expect(page.locator('.prompt-library-item')).toHaveCount(1);await expect(page.getByLabel('Prompt 画面',{exact:true})).toHaveValue('这段草稿需要保留。');
+});

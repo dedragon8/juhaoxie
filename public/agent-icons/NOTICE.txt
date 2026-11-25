@@ -1,0 +1,6 @@
+Third-party product icons — used only to identify a connected MCP client.
+Codex: original icon-codex-light.png from the official OpenAI ChatGPT macOS app, /Applications/ChatGPT.app/Contents/Resources. Retrieved 2026-11-18; original file unchanged. UI clips the outer app-icon tile to display the central mark without a background.
+OpenAI trademarks and icon belong to OpenAI. https://openai.com/brand/
+Claude: original https://claude.com/icon.png retrieved 2026-11-18; no artwork modification.
+Claude trademarks and icon belong to Anthropic. https://www.anthropic.com/legal
+These marks are not part of Juhaoxie's original artwork or open-source license. Display does not imply endorsement or partnership.

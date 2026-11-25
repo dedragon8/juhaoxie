@@ -1,0 +1,22 @@
+剧好写 JHWRITE 文件格式 v1（兼容旧 DRG）
+
+用途：跨电脑传输当前剧本完整快照，macOS 文件扩展名 .jhwrite；继续读取旧 .drg。
+本格式不是加密格式，不提供访问控制或不可逆的内容隐藏；不可声称只有剧好写能读取。SHA-256 仅检测意外损坏，不是数字签名。
+
+文件头（大端整数，共 48 字节）
+0–7: ASCII JUHAODRG
+8–9: 容器版本 1
+10–11: 保留标志 0
+12–15: 压缩载荷字节长度
+16–47: 压缩载荷 SHA-256
+48 起：gzip 压缩的 UTF-8 JSON
+
+JSON 字段：format = studio.changjing.writer.drg；version = 1；documentId；savedAt（ISO 时间）；protected（安全区标记）；script（现有 schemaVersion 1 剧本快照）。
+script 保留标题、作者、联系信息、排版、默认字体、幕、人物、场景、隐藏状态、梗概、笔记、集数、出场人物、段落类型及字体。
+不携带 iCloud 引用、访问令牌、AI 授权、撤销栈、本机版本历史或用户账号。
+限制：文件最多 32 MiB，解压后内容最多 64 MiB；未知版本、长度不符、校验失败、重复场景 ID、无效结构一律拒绝。
+
+导入为独立本机项目，不覆盖已有作品。相同 documentId 与载荷校验值重复打开时，打开之前的本机副本，保留其后续修改；内容不同则新建副本。安全区标记先写入本机安全策略再打开项目。
+编辑自动保存到本机剧本库，不自动回写传入文件；传输前使用“导出 → 保存剧本文件（.jhwrite）”或 Command+Shift+S 保存新快照。
+macOS 声明 UTI studio.changjing.writer.jhwrite（默认候选）及旧 studio.changjing.writer.drg（Alternate），接收 open-file 事件。为确保历史文件兼容与重复导入判断稳定，魔数 JUHAODRG、JSON format 和容器版本均不变。不会兼容或导入其他软件的 DRG。
+保存采用同目录临时文件（0600）、fsync、rename；不完整写入不会先截断原文件。普通文件无密码，安全区标记不等于文件加密。

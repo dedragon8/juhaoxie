@@ -1,0 +1,18 @@
+import {_electron as electron,expect} from '@playwright/test';import {mkdtemp,mkdir,rm,readFile,writeFile} from 'node:fs/promises';import {tmpdir} from 'node:os';import path from 'node:path';import {execFile} from 'node:child_process';import {promisify} from 'node:util';
+import {encodeDrg,decodeDrg} from '../src/core/drg.ts';
+const executablePath=path.resolve(process.argv[2]),bundle=path.resolve(executablePath,'../../..'),profile=await mkdtemp(path.join(tmpdir(),'juhao-drg-native-')),out=path.resolve('artifacts/native-0.5.9');await mkdir(out,{recursive:true});let app;
+const script={schemaVersion:1,title:'传输验收',author:'测试',contact:'',layout:'shortDrama',fontFamily:'Songti SC',acts:[{id:'act',name:'第一幕',order:'a0'}],characters:{a:'林舟'},scenes:[{id:'scene',order:'a0',name:'开场',actId:'act',episode:2,cast:'林舟',setting:'外景',location:'车站',time:'夜',summary:'梗概',notes:'笔记',deleted:false,blocks:[{kind:'character',text:'林舟'},{kind:'parenthetical',text:'（OS）'},{kind:'dialogue',text:'我们出发。',runs:[{text:'我们出发。',fontFamily:'Kaiti SC'}]}]}]};
+const input=path.join(profile,'传输验收.jhwrite'),output=path.join(profile,'再次保存.jhwrite');await writeFile(input,await encodeDrg(script,{documentId:'native-file',protected:true}));
+try{
+ app=await electron.launch({executablePath,env:{...process.env,CHANGJING_USER_DATA:profile}});const page=await app.firstWindow();await page.waitForLoadState('domcontentloaded');
+ // macOS delivers the actual open-file event to the running bundle.
+ await promisify(execFile)('/usr/bin/open',['-a',bundle,input]);await expect(page.locator('.tiptap')).toContainText('我们出发。');await expect(page.locator('.save-indicator')).toContainText('安全区');await expect(page.locator('[data-font="Kaiti SC"]')).toHaveText('我们出发。');
+ await app.evaluate(({dialog},target)=>{dialog.showSaveDialog=async()=>({canceled:false,filePath:target})},output);
+ await page.getByRole('button',{name:'导出',exact:true}).click();await page.getByRole('button',{name:'保存剧本文件（.jhwrite）',exact:true}).click();await expect.poll(async()=>{try{return (await readFile(output)).length}catch{return 0}}).toBeGreaterThan(48);
+ const exported=await decodeDrg(await readFile(output));expect(exported.protected).toBe(true);expect(exported.script.scenes[0].blocks.map(b=>b.text)).toEqual(['林舟','（OS）','我们出发。']);expect(exported.script.scenes[0].notes).toBe('笔记');
+ await promisify(execFile)('/usr/bin/open',['-a',bundle,input]);await page.getByRole('button',{name:'剧本库',exact:true}).click();await expect(page.locator('.library-card')).toHaveCount(1);
+ // Files received before the renderer finishes loading remain queued.
+ await Promise.all([page.waitForEvent('domcontentloaded'),app.evaluate(({app,BrowserWindow},file)=>new Promise(resolve=>{const window=BrowserWindow.getAllWindows()[0];window.webContents.once('did-start-loading',()=>{app.emit('open-file',{preventDefault(){}},file);resolve()});window.reload()}),input)]);await expect(page.locator('.tiptap')).toContainText('我们出发。');
+ const bad=path.join(profile,'其他软件.drg');await writeFile(bad,'Other DRG format');await promisify(execFile)('/usr/bin/open',['-a',bundle,bad]);await expect(page.getByText(/不是剧好写的/)).toBeVisible();await expect(page.locator('.tiptap')).toContainText('我们出发。');
+ await writeFile(path.join(out,'drg-result.json'),JSON.stringify({passed:true,checks:['macOS open-file delivery','renderer startup queue','native atomic file save','font and text preserved','protected file stays in security zone','duplicate open reuses local copy','unrelated DRG rejected']},null,2));console.log('Native DRG transfer acceptance passed.');
+}finally{await app?.close();await rm(profile,{recursive:true,force:true})}

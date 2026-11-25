@@ -1,0 +1,81 @@
+{
+  "fill": {
+    "linear-gradient": [
+      "extended-srgb:1.00000,1.00000,1.00000,1.00000",
+      "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+    ]
+  },
+  "groups": [
+    {
+      "name": "Closing quotation mark",
+      "layers": [
+        {
+          "image-name": "quote.svg",
+          "name": "右双引号 ”",
+          "glass": true
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.3
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": false,
+        "value": 0.35
+      }
+    },
+    {
+      "name": "浅色背景",
+      "layers": [
+        {
+          "image-name": "background.svg",
+          "name": "固定浅色底",
+          "glass": false
+        }
+      ],
+      "shadow": {
+        "kind": "none",
+        "opacity": 0
+      },
+      "specular": false,
+      "translucency": {
+        "enabled": false,
+        "value": 0
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "macOS"
+    ]
+  },
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:1.00000,1.00000,1.00000,1.00000",
+          "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+        ]
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:1.00000,1.00000,1.00000,1.00000",
+          "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+        ]
+      }
+    },
+    {
+      "appearance": "tinted",
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:1.00000,1.00000,1.00000,1.00000",
+          "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+        ]
+      }
+    }
+  ]
+}

@@ -18,5 +18,17 @@
 
 此版本采用本地签名，未经 Apple 公证。下载页附有 SHA-256 校验文件。
 
-© 2026 Fu Junhao
+## 从源码运行
 
+开发环境使用 Node.js 24、pnpm 11。先运行以下命令安装锁定版本的依赖并启动编辑器。
+
+```sh
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+运行单元测试用 `pnpm test`，编译用 `pnpm build`。打包 Apple 芯片 Mac 版需要 Xcode 26、Icon Composer 和 Node.js 的 C 头文件。将 `JUHAO_NODE_HEADERS` 指向包含 `node_api.h` 的目录，然后运行 `pnpm build:icloud` 和 `pnpm package:mac`。[原生组件说明](native/AppShell/README.md)
+
+## 许可证与致谢
+
+© 2026 Fu Junhao。剧好写原创程序采用 [GNU GPL 第 3 版](LICENSE)（GPL-3.0-only）。第三方代码、图标及引用内容的作者与许可见[第三方说明](THIRD_PARTY.md)。
